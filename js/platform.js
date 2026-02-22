@@ -1,6 +1,5 @@
-const canvas = document.getElementById("game");
+const canvas = document.getElementById("cv");
 const ctx = canvas.getContext("2d");
-
 let W = 0;
 let H = 0;
 let DPR = 1;
