@@ -281,7 +281,7 @@ for (const c of crates) {
 }
 
 function updateHUD() {
-  const prog = Math.max(0, Math.min(1, player.x / (goal.x + 200)));
+  const prog = Math.max(0, Math.min(1, player.x / goal.x));
   fillEl.style.width = (prog * 100).toFixed(0) + "%";
   pctEl.textContent = Math.floor(prog * 100) + "%";
   mEl.textContent = Math.floor(player.x / 10) + "m";
