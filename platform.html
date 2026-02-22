@@ -1,19 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Platform (Soon)</title>
-  <link rel="stylesheet" href="css/main.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Navigate the Day 🌤️</title>
+
+  <link rel="stylesheet" href="css/platform.css" />
+  <script src="js/platform.js" defer></script>
 </head>
+
 <body>
-  <div class="page">
-    <div class="card">
-      <h1 class="title">Next: Platform Game 🎮</h1>
-      <p class="subtitle">We’ll drop the real game here when you’re ready.</p>
-      <div class="btnRow">
-        <a class="pill primary" href="index.html" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;">Back</a>
+
+  <div class="app">
+
+    <!-- Header -->
+    <header class="hud">
+      <h1>Navigate the Day 🌤️</h1>
+      <p class="caption">Jump the gaps. Reach the car.</p>
+
+      <!-- Progress Bar -->
+      <div class="progress">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="percent" id="percent">0%</div>
+    </header>
+
+    <!-- Game Area -->
+    <main class="stage">
+      <canvas id="game"></canvas>
+    </main>
+
+    <!-- Controls -->
+    <footer class="controls">
+      <button class="control-btn" id="leftBtn">◀</button>
+      <button class="control-btn jump" id="jumpBtn">JUMP</button>
+      <button class="control-btn" id="rightBtn">▶</button>
+    </footer>
+
+    <!-- Win Overlay -->
+    <div class="overlay hidden" id="winBox">
+      <div class="modal">
+        <h2>You made it 💗</h2>
+        <p>Destination unlocked.</p>
+        <button id="continueBtn">Continue</button>
       </div>
     </div>
+
   </div>
+
 </body>
 </html>
