@@ -448,4 +448,54 @@ continueBtn?.addEventListener("click", () => {
 
 // INIT
 resize();
-requestAnimationFrame(loop);
+
+// --- LOADING OVERLAY + ASSET PRELOAD ---
+const loadingEl = document.getElementById("loading");
+const loadFillEl = document.getElementById("loadFill");
+const loadPctEl = document.getElementById("loadPct");
+
+// List ALL images that must be ready before game starts
+const assetsToLoad = [
+  playerImg,
+  carImg
+];
+
+function preloadImages(list) {
+  return new Promise((resolve) => {
+    let done = 0;
+    const total = list.length;
+
+    function tick() {
+      done++;
+      const pct = Math.round((done / total) * 100);
+      if (loadFillEl) loadFillEl.style.width = pct + "%";
+      if (loadPctEl) loadPctEl.textContent = pct + "%";
+      if (done >= total) resolve();
+    }
+
+    // If already cached/loaded
+    for (const img of list) {
+      if (img.complete && img.naturalWidth > 0) {
+        tick();
+      } else {
+        img.addEventListener("load", tick, { once:true });
+        img.addEventListener("error", tick, { once:true }); // still continue
+      }
+    }
+
+    // Edge case: total=0
+    if (total === 0) resolve();
+  });
+}
+
+// Show loading
+if (loadingEl) loadingEl.classList.remove("hidden");
+
+// Wait then start game loop
+preloadImages(assetsToLoad).then(() => {
+  // small delay makes it feel smoother
+  setTimeout(() => {
+    if (loadingEl) loadingEl.classList.add("hidden");
+    requestAnimationFrame(loop);
+  }, 250);
+});
