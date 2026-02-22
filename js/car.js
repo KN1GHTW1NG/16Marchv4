@@ -10,7 +10,6 @@ const leftBtn = document.getElementById("leftBtn");
 const rightBtn = document.getElementById("rightBtn");
 const restartBtn = document.getElementById("restart");
 const continueBtn = document.getElementById("continueBtn");
-const continueBtn = document.getElementById("continueBtn");
 // Loading overlay
 const loadingEl = document.getElementById("loading");
 const loadFillEl = document.getElementById("loadFill");
