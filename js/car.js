@@ -1,278 +1,271 @@
-const canvas = document.getElementById("carGame");
+const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-// Responsive portrait canvas (fits iPhone better)
-function resizeCanvas() {
-  const maxW = 420;
-  const cssW = Math.min(maxW, window.innerWidth - 20);
-  const cssH = Math.min(window.innerHeight * 0.68, 740);
+const progressFill = document.getElementById("progressFill");
+const percentEl = document.getElementById("percent");
+const gameOverEl = document.getElementById("gameOver");
+const winEl = document.getElementById("win");
+
+const leftBtn = document.getElementById("leftBtn");
+const rightBtn = document.getElementById("rightBtn");
+const restartBtn = document.getElementById("restart");
+const continueBtn = document.getElementById("continueBtn");
+
+let W = 0, H = 0, DPR = 1;
+
+function resize() {
+  DPR = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+
+  const cssW = Math.min(420, window.innerWidth - 20);
+  const cssH = Math.min(window.innerHeight * 0.78, 780);
 
   canvas.style.width = cssW + "px";
   canvas.style.height = cssH + "px";
 
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
-  canvas.width = Math.round(cssW * dpr);
-  canvas.height = Math.round(cssH * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  canvas.width = cssW * DPR;
+  canvas.height = cssH * DPR;
+
+  W = cssW;
+  H = cssH;
+
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  computeRoad();
 }
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
+window.addEventListener("resize", resize);
 
-const leftBtn = document.getElementById("leftBtn");
-const rightBtn = document.getElementById("rightBtn");
-const retryBtn = document.getElementById("retryBtn");
-const progressFill = document.getElementById("progressFill");
+// ---- Theme ----
+const PINK1 = "#FFB6C1";
+const PINK2 = "#F8C8DC";
+const PINK3 = "#AA336A";
 
-// ✅ Your assets
-const playerCarImg = new Image();
-playerCarImg.src = "assets/IMG_2122.png";
+// ---- Road ----
+const LANES = 3;
+let roadX, roadW, laneW, laneCenters;
 
+function computeRoad() {
+  roadW = W * 0.78;
+  roadX = (W - roadW) / 2;
+  laneW = roadW / LANES;
+  laneCenters = Array.from({length: LANES}, (_,i)=> roadX + laneW*i + laneW/2);
+}
+
+// ---- Player PNG ----
+const playerImg = new Image();
+playerImg.src = "https://github.com/KN1GHTW1NG/Surprise/raw/refs/heads/main/IMG_2120.png";
+
+let playerReady = false;
+playerImg.onload = ()=> playerReady = true;
+
+// ---- Obstacle PNG ----
 const obstacleImg = new Image();
-obstacleImg.src = "assets/IMG_2125.png";
+obstacleImg.src = "https://github.com/KN1GHTW1NG/Surprise/raw/refs/heads/main/IMG_2125.png";
 
-// ----- Road / lanes -----
-const lanes = 3;
-const lanePadding = 28; // side margin inside canvas
-function laneWidth() {
-  const cssW = parseFloat(canvas.style.width) || 400;
-  return (cssW - lanePadding * 2) / lanes;
-}
-function laneX(laneIndex) {
-  return lanePadding + laneIndex * laneWidth();
-}
+let obstacleReady = false;
+obstacleImg.onload = ()=> obstacleReady = true;
 
-// Player size + position
-let player = {
+// ---- Game State ----
+const state = {
+  running: true,
+  won: false,
+  distance: 0,
+  goal: 1600, // 🔥 LONGER GAME
   lane: 1,
   x: 0,
+  vx: 0,
   y: 0,
-  w: 82,   // slightly bigger (more readable)
-  h: 132
+  carH: 130,
+  speed: 380,
+  scroll: 0,
+  spawnTimer: 0
 };
 
 let obstacles = [];
-let speed = 4.2;      // road scroll speed
-let progress = 0;
-let gameOver = false;
 
-let dashedOffset = 0;
-let spawnTimer = null;
-let rafId = null;
+// ---- Reset ----
+function resetGame(){
+  state.running = true;
+  state.won = false;
+  state.distance = 0;
+  state.lane = 1;
+  state.vx = 0;
+  state.scroll = 0;
+  state.spawnTimer = 0;
 
-function resetPlayerPosition() {
-  const cssW = parseFloat(canvas.style.width) || 400;
-  const cssH = parseFloat(canvas.style.height) || 650;
+  obstacles = [];
 
-  player.x = laneX(player.lane) + (laneWidth() - player.w) / 2;
-  player.y = cssH - player.h - 22;
+  state.x = laneCenters[state.lane];
+  state.y = H - 200;
+
+  gameOverEl.classList.add("hidden");
+  winEl.classList.add("hidden");
+
+  progressFill.style.width = "0%";
+  percentEl.textContent = "0%";
 }
 
-function spawnObstacle() {
-  const lane = Math.floor(Math.random() * lanes);
-  const cssH = parseFloat(canvas.style.height) || 650;
+// ---- Controls ----
+function moveLane(dir){
+  if(!state.running) return;
+  state.lane = Math.max(0, Math.min(LANES-1, state.lane + dir));
+}
 
+leftBtn.onclick = ()=> moveLane(-1);
+rightBtn.onclick = ()=> moveLane(1);
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="ArrowLeft") moveLane(-1);
+  if(e.key==="ArrowRight") moveLane(1);
+});
+
+// ---- Spawn ----
+function spawn(){
+  const lane = Math.floor(Math.random()*LANES);
   obstacles.push({
     lane,
-    x: laneX(lane) + (laneWidth() - 76) / 2,
-    y: -160,
-    w: 76,
-    h: 122
+    x: laneCenters[lane],
+    y: -140,
+    vy: state.speed * (0.9 + Math.random()*0.2)
   });
 }
 
-// Simple AABB collision
-function hit(a, b) {
-  return !(
-    a.x + a.w <= b.x ||
-    a.x >= b.x + b.w ||
-    a.y + a.h <= b.y ||
-    a.y >= b.y + b.h
-  );
+// ---- Collision ----
+function hit(a,b){
+  return !(a.x+a.w < b.x || a.x > b.x+b.w || a.y+a.h < b.y || a.y > b.y+b.h);
 }
 
-function drawRoad() {
-  const cssW = parseFloat(canvas.style.width) || 400;
-  const cssH = parseFloat(canvas.style.height) || 650;
-
-  // background pink gradient
-  const bg = ctx.createLinearGradient(0, 0, 0, cssH);
-  bg.addColorStop(0, "#F8C8DC");
-  bg.addColorStop(1, "#FFB6C1");
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, cssW, cssH);
-
-  // road slab
-  const roadX = lanePadding - 10;
-  const roadW = cssW - (lanePadding - 10) * 2;
-
-  const roadGrad = ctx.createLinearGradient(0, 0, 0, cssH);
-  roadGrad.addColorStop(0, "rgba(40,40,46,0.35)");
-  roadGrad.addColorStop(1, "rgba(20,20,26,0.45)");
-  ctx.fillStyle = roadGrad;
-  ctx.fillRect(roadX, 0, roadW, cssH);
-
-  // road edge highlights
-  ctx.fillStyle = "rgba(255,255,255,0.18)";
-  ctx.fillRect(roadX, 0, 3, cssH);
-  ctx.fillRect(roadX + roadW - 3, 0, 3, cssH);
-
-  // lane dashed lines (moving)
-  dashedOffset = (dashedOffset + speed * 2) % 40;
-
-  for (let i = 1; i < lanes; i++) {
-    const x = laneX(i);
-    ctx.strokeStyle = "rgba(255,255,255,0.55)";
-    ctx.lineWidth = 4;
-    ctx.setLineDash([18, 22]);
-    ctx.lineDashOffset = -dashedOffset;
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, cssH);
-    ctx.stroke();
-  }
-  ctx.setLineDash([]);
-
-  // subtle vignette
-  const vignette = ctx.createRadialGradient(
-    cssW / 2, cssH * 0.55, cssH * 0.1,
-    cssW / 2, cssH * 0.55, cssH * 0.9
-  );
-  vignette.addColorStop(0, "rgba(0,0,0,0)");
-  vignette.addColorStop(1, "rgba(0,0,0,0.25)");
-  ctx.fillStyle = vignette;
-  ctx.fillRect(0, 0, cssW, cssH);
+// ---- Drawing ----
+function drawBackground(){
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,PINK2);
+  g.addColorStop(1,PINK1);
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
 }
 
-function drawGameOverOverlay() {
-  const cssW = parseFloat(canvas.style.width) || 400;
-  const cssH = parseFloat(canvas.style.height) || 650;
+function drawRoad(dt){
+  state.scroll += state.speed * dt;
 
-  ctx.fillStyle = "rgba(0,0,0,0.45)";
-  ctx.fillRect(0, 0, cssW, cssH);
+  ctx.fillStyle = PINK3;
+  ctx.fillRect(roadX,0,roadW,H);
 
-  // pink-ish dialog
-  const boxW = Math.min(320, cssW - 40);
-  const boxH = 150;
-  const x = (cssW - boxW) / 2;
-  const y = (cssH - boxH) / 2;
+  ctx.fillStyle="rgba(255,255,255,0.15)";
+  ctx.fillRect(roadX+8,0,roadW-16,H);
 
-  ctx.fillStyle = "rgba(248,200,220,0.95)";
-  ctx.strokeStyle = "rgba(170,51,106,0.55)";
-  ctx.lineWidth = 2;
-  roundRect(ctx, x, y, boxW, boxH, 18);
-  ctx.fill();
-  ctx.stroke();
+  const dashH=50,gap=40;
+  const offset= state.scroll % (dashH+gap);
 
-  ctx.fillStyle = "#AA336A";
-  ctx.font = "800 18px system-ui";
-  ctx.textAlign = "center";
-  ctx.fillText("OOPS 😅  Tiny collision!", cssW / 2, y + 52);
-
-  ctx.fillStyle = "rgba(31,31,34,0.75)";
-  ctx.font = "600 13px system-ui";
-  ctx.fillText("Tap Try Again to continue the journey.", cssW / 2, y + 82);
-}
-
-function roundRect(ctx, x, y, w, h, r) {
-  const rr = Math.min(r, w / 2, h / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + rr, y);
-  ctx.arcTo(x + w, y, x + w, y + h, rr);
-  ctx.arcTo(x + w, y + h, x, y + h, rr);
-  ctx.arcTo(x, y + h, x, y, rr);
-  ctx.arcTo(x, y, x + w, y, rr);
-  ctx.closePath();
-}
-
-function updateAndDraw() {
-  const cssW = parseFloat(canvas.style.width) || 400;
-  const cssH = parseFloat(canvas.style.height) || 650;
-
-  // Always draw, even when gameOver
-  drawRoad();
-
-  // Update obstacles only if not gameOver
-  if (!gameOver) {
-    for (let o of obstacles) o.y += speed;
-
-    // Remove off-screen
-    obstacles = obstacles.filter(o => o.y < cssH + 200);
-
-    // Progress
-    progress += 0.10;
-    progressFill.style.width = Math.min(progress, 100) + "%";
-
-    if (progress >= 100) {
-      window.location.href = "colorselect.html";
-      return;
+  ctx.fillStyle="white";
+  for(let i=1;i<LANES;i++){
+    const x= roadX + i*laneW;
+    for(let y=-offset; y<H; y+=dashH+gap){
+      ctx.fillRect(x-3,y,6,dashH);
     }
   }
+}
 
-  // Draw obstacles
-  for (let o of obstacles) {
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(obstacleImg, o.x, o.y, o.w, o.h);
+function drawPlayer(){
+  if(!playerReady) return;
+
+  const ratio = playerImg.width/playerImg.height;
+  let drawH = state.carH;
+  let drawW = drawH * ratio;
+
+  if(drawW > laneW*0.9){
+    drawW = laneW*0.9;
+    drawH = drawW/ratio;
   }
 
-  // Update player x from lane
-  player.x = laneX(player.lane) + (laneWidth() - player.w) / 2;
+  const x = state.x - drawW/2;
+  ctx.drawImage(playerImg,x,state.y,drawW,drawH);
+}
 
-  // Draw player
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(playerCarImg, player.x, player.y, player.w, player.h);
+function drawObstacle(o){
+  if(!obstacleReady) return;
 
-  // Collision check (only when running)
-  if (!gameOver) {
-    const pBox = { x: player.x, y: player.y, w: player.w, h: player.h };
-    for (let o of obstacles) {
-      if (hit(pBox, o)) {
-        gameOver = true;
-        retryBtn.classList.remove("hidden");
-        stopSpawning();
-        break;
+  const ratio = obstacleImg.width/obstacleImg.height;
+  let drawH = 120;
+  let drawW = drawH * ratio;
+
+  if(drawW > laneW*0.9){
+    drawW = laneW*0.9;
+    drawH = drawW/ratio;
+  }
+
+  const x = o.x - drawW/2;
+  ctx.drawImage(obstacleImg,x,o.y,drawW,drawH);
+
+  // store hitbox for collision
+  o.hitbox = {
+    x: x + drawW*0.2,
+    y: o.y + 15,
+    w: drawW*0.6,
+    h: drawH - 30
+  };
+}
+
+// ---- Game Loop ----
+let last=performance.now();
+
+function loop(now){
+  const dt=Math.min(0.033,(now-last)/1000);
+  last=now;
+
+  ctx.clearRect(0,0,W,H);
+  drawBackground();
+  drawRoad(dt);
+
+  if(state.running && !state.won){
+
+    state.distance += dt*120;
+    const progress = Math.min(state.distance/state.goal,1);
+    progressFill.style.width = progress*100+"%";
+    percentEl.textContent = Math.floor(progress*100)+"%";
+
+    state.spawnTimer += dt;
+    if(state.spawnTimer > 1.2){ // slightly spaced
+      state.spawnTimer=0;
+      spawn();
+    }
+
+    const target = laneCenters[state.lane];
+    const dx = target - state.x;
+    state.vx += dx*4000*dt;
+    state.vx *= 0.85;
+    state.x += state.vx*dt;
+
+    obstacles.forEach(o=> o.y += o.vy*dt);
+
+    for(const o of obstacles){
+      drawObstacle(o);
+    }
+
+    const playerBox = {
+      x: state.x-35,
+      y: state.y+20,
+      w:70,
+      h:100
+    };
+
+    for(const o of obstacles){
+      if(o.hitbox && hit(playerBox,o.hitbox)){
+        state.running=false;
+        gameOverEl.classList.remove("hidden");
       }
     }
+
+    if(progress>=1){
+      state.won=true;
+      winEl.classList.remove("hidden");
+    }
   }
 
-  // Game over overlay
-  if (gameOver) drawGameOverOverlay();
-
-  rafId = requestAnimationFrame(updateAndDraw);
+  drawPlayer();
+  requestAnimationFrame(loop);
 }
 
-function startSpawning() {
-  stopSpawning();
-  spawnTimer = setInterval(spawnObstacle, 1100);
-}
-function stopSpawning() {
-  if (spawnTimer) clearInterval(spawnTimer);
-  spawnTimer = null;
-}
+restartBtn.onclick = resetGame;
 
-// Controls
-leftBtn.onclick = () => {
-  if (gameOver) return;
-  player.lane = Math.max(0, player.lane - 1);
-};
-
-rightBtn.onclick = () => {
-  if (gameOver) return;
-  player.lane = Math.min(lanes - 1, player.lane + 1);
-};
-
-retryBtn.onclick = () => {
-  // Full reset + restart loop + respawn obstacles
-  obstacles = [];
-  progress = 0;
-  progressFill.style.width = "0%";
-  gameOver = false;
-  retryBtn.classList.add("hidden");
-  player.lane = 1;
-  resetPlayerPosition();
-  startSpawning();
-};
-
-// Init
-resetPlayerPosition();
-startSpawning();
-updateAndDraw();
+resize();
+computeRoad();
+resetGame();
+requestAnimationFrame(loop);
