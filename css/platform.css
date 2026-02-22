@@ -159,3 +159,40 @@ canvas{
 }
 .pill:active{transform: translateY(2px); box-shadow:0 7px 14px rgba(0,0,0,.14); filter:brightness(.98);}
 .primary{background: linear-gradient(180deg, #00b894, #00997a); color:#fff; border-color: rgba(0,0,0,.08);}
+.loadRow{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  margin-top:10px;
+}
+
+.loadGif{
+  width:120px;
+  height:auto;
+  border-radius:16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,.10);
+}
+
+.loadBar{
+  width:min(360px, 90%);
+  height:14px;
+  background: rgba(0,0,0,.06);
+  border-radius:999px;
+  overflow:hidden;
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+.loadFill{
+  height:100%;
+  width:0%;
+  background: linear-gradient(90deg, #FFB6C1, #F8C8DC, #AA336A);
+  border-radius:999px;
+  transition: width 120ms linear;
+}
+
+.loadPct{
+  font-weight:900;
+  color: rgba(30,31,34,.7);
+  font-size:13px;
+}
