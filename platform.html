@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Platform Run</title>
+  <title>Platform Game</title>
 
-  <link rel="stylesheet" href="css/platform.css?v=3" />
-  <script src="js/platform.js?v=3" defer></script>
+  <link rel="stylesheet" href="css/platform.css?v=202" />
+  <script src="js/platform.js?v=202" defer></script>
 </head>
 
 <body>
   <div class="wrap" tabindex="0">
     <header class="hud">
-      <div class="title">Platform Run</div>
+      <div class="title">Platform Run <span id="jsBadge" class="badge">JS: …</span></div>
       <div class="sub">Arrow keys / WASD + Space. On phone: D-pad + Jump. Reach the car 🚗</div>
 
       <div class="progRow">
@@ -23,14 +23,15 @@
         </div>
       </div>
 
-      <div class="micro">Tip: tap the game once to keep keyboard focus.</div>
+      <div class="micro">Tap the game once to activate keyboard input.</div>
+      <div id="errBox" class="err hidden"></div>
     </header>
 
     <main class="stage">
       <canvas id="cv"></canvas>
     </main>
 
-    <footer class="controls">
+    <footer class="controls" aria-label="controls">
       <div class="dpad">
         <button class="btn up" id="upBtn">▲</button>
         <button class="btn left" id="leftBtn">◀</button>
