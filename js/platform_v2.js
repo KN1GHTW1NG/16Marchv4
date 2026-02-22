@@ -70,6 +70,8 @@ carImg.onload = () => (carReady = true);
 let groundY = 0;
 let platforms = [];
 let clouds = [];
+let ledges = [];
+let crates = [];
 
 const goal = { x: 2050, w: 150 }; // width fixed; height from aspect ratio
 
