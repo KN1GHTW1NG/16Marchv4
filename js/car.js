@@ -300,11 +300,7 @@ state.x += (target - state.x) * Math.min(1, snap * dt);
   }
 
   drawPlayer();
-if (!started) {
-  started = true;
-  last = performance.now();   // reset timer so dt doesn’t spike
-  requestAnimationFrame(loop);
-}
+
 
 
 restartBtn.onclick = resetGame;
