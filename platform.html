@@ -1,46 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><link rel="stylesheet" href="css/platform.css">
-<script src="js/platform.js?v=999" defer></script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Platform Game</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Platform Run</title>
 
-  <link rel="stylesheet" href="css/platform.css">
-  <script src="js/platform.js" defer></script>
+  <link rel="stylesheet" href="css/platform.css?v=3" />
+  <script src="js/platform.js?v=3" defer></script>
 </head>
 
 <body>
-
-  <div class="wrap" id="wrap" tabindex="0">
-    
+  <div class="wrap" tabindex="0">
     <header class="hud">
       <div class="title">Platform Run</div>
-      <div class="sub">
-        Arrow keys / WASD + Space. On phone: D-pad + Jump. Reach the car 🚗
-      </div>
+      <div class="sub">Arrow keys / WASD + Space. On phone: D-pad + Jump. Reach the car 🚗</div>
 
       <div class="progRow">
-        <div class="bar">
-          <div class="fill" id="fill"></div>
-        </div>
+        <div class="bar"><div class="fill" id="fill"></div></div>
         <div class="stats">
           <span id="pct">0%</span>
           <span id="m">0m</span>
         </div>
       </div>
 
-      <div class="micro">
-        Tap the game once to activate keyboard input.
-      </div>
+      <div class="micro">Tip: tap the game once to keep keyboard focus.</div>
     </header>
 
     <main class="stage">
-      <!-- Portrait canvas -->
-      <canvas id="cv" width="540" height="960"></canvas>
+      <canvas id="cv"></canvas>
     </main>
 
-    <footer class="controls" aria-label="controls">
+    <footer class="controls">
       <div class="dpad">
         <button class="btn up" id="upBtn">▲</button>
         <button class="btn left" id="leftBtn">◀</button>
@@ -54,17 +44,13 @@
     <div class="overlay hidden" id="win">
       <div class="modal">
         <div class="h1">Congratulations 🎉</div>
-        <div class="p">
-          You reached the car. Ready for the next challenge?
-        </div>
-
+        <div class="p">You reached the car. Ready for the next challenge?</div>
         <div class="row">
           <button class="pill primary" id="continue">Continue</button>
           <button class="pill" id="replay">Replay</button>
         </div>
       </div>
     </div>
-
   </div>
 </body>
 </html>
