@@ -10,6 +10,11 @@ const leftBtn = document.getElementById("leftBtn");
 const rightBtn = document.getElementById("rightBtn");
 const restartBtn = document.getElementById("restart");
 const continueBtn = document.getElementById("continueBtn");
+const continueBtn = document.getElementById("continueBtn");
+// Loading overlay
+const loadingEl = document.getElementById("loading");
+const loadFillEl = document.getElementById("loadFill");
+const loadPctEl  = document.getElementById("loadPct");
 
 let W = 0, H = 0, DPR = 1;
 
@@ -266,4 +271,28 @@ restartBtn.onclick = resetGame;
 resize();
 computeRoad();
 resetGame();
-requestAnimationFrame(loop);
+// loop starts after loader finishes
+// ---------------- 5 SECOND LOADER (smooth bar) ----------------
+window.addEventListener("load", function () {
+  const totalTime = 5000;
+  const startTime = Date.now();
+
+  if (loadingEl) loadingEl.classList.remove("hidden");
+
+  const timer = setInterval(() => {
+    const elapsed = Date.now() - startTime;
+    const remaining = Math.max(0, totalTime - elapsed);
+
+    const seconds = Math.ceil(remaining / 1000);
+    const progress = Math.min(1, elapsed / totalTime);
+
+    if (loadPctEl)  loadPctEl.textContent = seconds + "s";
+    if (loadFillEl) loadFillEl.style.width = (progress * 100) + "%";
+
+    if (elapsed >= totalTime) {
+      clearInterval(timer);
+      if (loadingEl) loadingEl.classList.add("hidden");
+      requestAnimationFrame(loop);
+    }
+  }, 30);
+});
