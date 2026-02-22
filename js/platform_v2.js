@@ -80,13 +80,13 @@ function buildLevel() {
 
   // These create REAL gaps between them (pits)
   platforms = [
-    { x: 0,    w: 300 },
-    { x: 380,  w: 260 },
-    { x: 720,  w: 260 },
-    { x: 1060, w: 260 },
-    { x: 1400, w: 260 },
-    { x: 1740, w: 320 }
-  ];
+  { x: 0,    w: 300 },
+  { x: 380,  w: 260 },
+  { x: 720,  w: 260 },
+  { x: 1060, w: 260 },
+  { x: 1400, w: 260 },
+  { x: 1740, w: 320 }
+];
 // Floating ledges (mid-air)
 ledges = [
   { x: 260,  y: groundY - 150, w: 140, h: 18 },
