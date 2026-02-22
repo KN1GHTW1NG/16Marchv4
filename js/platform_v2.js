@@ -87,7 +87,22 @@ function buildLevel() {
     { x: 1400, w: 260 },
     { x: 1740, w: 320 }
   ];
+// Floating ledges (mid-air)
+ledges = [
+  { x: 260,  y: groundY - 150, w: 140, h: 18 },
+  { x: 690,  y: groundY - 210, w: 160, h: 18 },
+  { x: 980,  y: groundY - 160, w: 140, h: 18 },
+  { x: 1320, y: groundY - 230, w: 170, h: 18 },
+  { x: 1680, y: groundY - 175, w: 150, h: 18 }
+];
 
+// Crates (solid obstacles)
+crates = [
+  { x: 430,  y: groundY - 48, w: 44, h: 44 },
+  { x: 860,  y: groundY - 48, w: 44, h: 44 },
+  { x: 1120, y: groundY - 48, w: 44, h: 44 },
+  { x: 1550, y: groundY - 48, w: 44, h: 44 }
+];
   clouds = [
     { x: 140,  y: 80,  s: 1.00 },
     { x: 520,  y: 55,  s: 0.85 },
