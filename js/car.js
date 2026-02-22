@@ -227,12 +227,10 @@ function loop(now){
       spawn();
     }
 
-    const target = laneCenters[state.lane];
-    const dx = target - state.x;
-    state.vx += dx*4000*dt;
-    state.vx *= 0.85;
-    state.x += state.vx*dt;
-
+    // Smooth lane movement (NO vibration / NO overshoot)
+const target = laneCenters[state.lane];
+const snap = 18; // higher = faster lane change, still stable
+state.x += (target - state.x) * Math.min(1, snap * dt);
     obstacles.forEach(o=> o.y += o.vy*dt);
 
     for(const o of obstacles){
