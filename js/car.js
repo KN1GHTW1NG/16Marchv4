@@ -231,7 +231,10 @@ function loop(now){
       state.spawnTimer = 0;
       spawn();
     }
-
+restartBtn.onclick = resetGame;
+continueBtn.onclick = () => {
+  window.location.href = "color-pick.html";
+};
     // Smooth lane movement (NO vibration / NO overshoot)
     const target = laneCenters[state.lane];
     const snap = 18;
