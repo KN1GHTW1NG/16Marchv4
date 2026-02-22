@@ -453,7 +453,35 @@ const loadPctEl = document.getElementById("loadPct");
 
 resize();
 
-let countdown = 10;
+// ---------------- SMOOTH 10 SECOND COUNTDOWN ----------------
+
+const loadingEl = document.getElementById("loading");
+const loadPctEl = document.getElementById("loadPct");
+const loadFillEl = document.getElementById("loadFill");
+
+resize();
+
+const totalTime = 10000; // 10 seconds
+const startTime = Date.now();
+
+if (loadingEl) loadingEl.classList.remove("hidden");
+
+const timer = setInterval(() => {
+  const elapsed = Date.now() - startTime;
+  const remaining = Math.max(0, totalTime - elapsed);
+
+  const seconds = Math.ceil(remaining / 1000);
+  const progress = Math.min(1, elapsed / totalTime);
+
+  if (loadPctEl) loadPctEl.textContent = seconds + "s";
+  if (loadFillEl) loadFillEl.style.width = (progress * 100) + "%";
+
+  if (elapsed >= totalTime) {
+    clearInterval(timer);
+    if (loadingEl) loadingEl.classList.add("hidden");
+    requestAnimationFrame(loop);
+  }
+}, 30);;
 
 if (loadingEl) loadingEl.classList.remove("hidden");
 if (loadPctEl) loadPctEl.textContent = countdown + "s";
