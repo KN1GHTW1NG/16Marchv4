@@ -1,57 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Navigate the Day 🌤️</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platform Game</title>
 
-  <link rel="stylesheet" href="css/platform.css" />
+  <link rel="stylesheet" href="css/platform.css">
   <script src="js/platform.js" defer></script>
 </head>
 
 <body>
 
-  <div class="app">
-
-    <!-- Header -->
+  <div class="wrap" id="wrap" tabindex="0">
+    
     <header class="hud">
-      <h1>Navigate the Day 🌤️</h1>
-      <p class="caption">Jump the gaps. Reach the car.</p>
-
-      <!-- Progress Bar -->
-      <div class="progress">
-        <div class="progress-fill" id="progressFill"></div>
+      <div class="title">Platform Run</div>
+      <div class="sub">
+        Arrow keys / WASD + Space. On phone: D-pad + Jump. Reach the car 🚗
       </div>
-      <div class="percent" id="percent">0%</div>
+
+      <div class="progRow">
+        <div class="bar">
+          <div class="fill" id="fill"></div>
+        </div>
+        <div class="stats">
+          <span id="pct">0%</span>
+          <span id="m">0m</span>
+        </div>
+      </div>
+
+      <div class="micro">
+        Tap the game once to activate keyboard input.
+      </div>
     </header>
 
-    <!-- Game Area -->
     <main class="stage">
-      <canvas id="game"></canvas>
+      <!-- Portrait canvas -->
+      <canvas id="cv" width="540" height="960"></canvas>
     </main>
 
-    <!-- Controls -->
-   <footer class="controls">
-  <div class="left-controls">
-    <button class="control-btn" id="leftBtn">◀</button>
-    <button class="control-btn" id="rightBtn">▶</button>
-  </div>
+    <footer class="controls" aria-label="controls">
+      <div class="dpad">
+        <button class="btn up" id="upBtn">▲</button>
+        <button class="btn left" id="leftBtn">◀</button>
+        <button class="btn right" id="rightBtn">▶</button>
+        <button class="btn down" id="downBtn">▼</button>
+      </div>
 
-  <div class="right-controls">
-    <button class="control-btn jump" id="jumpBtn">JUMP</button>
-  </div>
-</footer>
+      <button class="jump" id="jumpBtn">JUMP</button>
+    </footer>
 
-    <!-- Win Overlay -->
-    <div class="overlay hidden" id="winBox">
+    <div class="overlay hidden" id="win">
       <div class="modal">
-        <h2>You made it 💗</h2>
-        <p>Destination unlocked.</p>
-        <button id="continueBtn">Continue</button>
+        <div class="h1">Congratulations 🎉</div>
+        <div class="p">
+          You reached the car. Ready for the next challenge?
+        </div>
+
+        <div class="row">
+          <button class="pill primary" id="continue">Continue</button>
+          <button class="pill" id="replay">Replay</button>
+        </div>
       </div>
     </div>
 
   </div>
+
+  <!-- Your JS file -->
+  <script src="platformjs.js"></script>
 
 </body>
 </html>
