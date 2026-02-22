@@ -446,67 +446,29 @@ continueBtn?.addEventListener("click", () => {
   window.location.href = "cargame.html";
 });
 
-// INIT
-resize();
+// ---------------- SIMPLE 10 SECOND COUNTDOWN ----------------
 
-// --- LOADING OVERLAY + ASSET PRELOAD ---
 const loadingEl = document.getElementById("loading");
-const loadFillEl = document.getElementById("loadFill");
 const loadPctEl = document.getElementById("loadPct");
 
-// List ALL images that must be ready before game starts
-const assetsToLoad = [
-  playerImg,
-  carImg
-];
+resize();
 
-function preloadImages(list) {
-  return new Promise((resolve) => {
-    let done = 0;
-    const total = list.length;
-
-    function tick() {
-      done++;
-      const pct = Math.round((done / total) * 100);
-      if (loadFillEl) loadFillEl.style.width = pct + "%";
-      if (loadPctEl) loadPctEl.textContent = pct + "%";
-      if (done >= total) resolve();
-    }
-
-    // If already cached/loaded
-    for (const img of list) {
-      if (img.complete && img.naturalWidth > 0) {
-        tick();
-      } else {
-        img.addEventListener("load", tick, { once:true });
-        img.addEventListener("error", tick, { once:true }); // still continue
-      }
-    }
-
-    // Edge case: total=0
-    if (total === 0) resolve();
-  });
-}
-
-
-// --- SIMPLE FAKE LOADING (guaranteed no stuck) ---
-const loadingEl = document.getElementById("loading");
-const loadFillEl = document.getElementById("loadFill");
-const loadPctEl  = document.getElementById("loadPct");
-
-let fakeProgress = 0;
+let countdown = 10;
 
 if (loadingEl) loadingEl.classList.remove("hidden");
+if (loadPctEl) loadPctEl.textContent = countdown + "s";
 
-const fakeTimer = setInterval(() => {
-  fakeProgress += 4;
+const countdownTimer = setInterval(() => {
+  countdown--;
 
-  if (loadFillEl) loadFillEl.style.width = fakeProgress + "%";
-  if (loadPctEl) loadPctEl.textContent = fakeProgress + "%";
+  if (loadPctEl) loadPctEl.textContent = countdown + "s";
 
-  if (fakeProgress >= 100) {
-    clearInterval(fakeTimer);
+  if (countdown <= 0) {
+    clearInterval(countdownTimer);
+
     if (loadingEl) loadingEl.classList.add("hidden");
+
     requestAnimationFrame(loop);
   }
-}, 50);
+}, 1000);
+  
