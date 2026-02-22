@@ -82,6 +82,7 @@ canvas {
 }
 
 .controls {
+  .controls{ height: var(--controlsH); }
   pointer-events: auto;
   position: fixed;
   left: 0;
@@ -175,9 +176,4 @@ canvas {
 @keyframes pinkFlow{
   0% { background-position: 0% 0%; }
   100% { background-position: 200% 0%; }
-}
-.controls, .controls * {
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
 }
