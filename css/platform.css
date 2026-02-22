@@ -174,8 +174,10 @@ canvas{
   box-shadow: 0 10px 25px rgba(0,0,0,.10);
 }
 
+/* ---- LOADING BAR ---- */
+
 .loadBar{
-  width:min(360px, 90%);
+  width: min(360px, 90%);
   height:14px;
   background: rgba(0,0,0,.06);
   border-radius:999px;
@@ -205,18 +207,4 @@ canvas{
 @keyframes pinkFlow{
   0%   { background-position: 0% 0%; }
   100% { background-position: 200% 0%; }
-}
-  background-size: 200% 100%;
-  animation: shimmer 3s linear infinite;
-  transition: width 1s linear;
-}
-
-@keyframes shimmer{
-  0% { background-position: 0% 0%; }
-  100% { background-position: 200% 0%; }
-}
-.loadPct{
-  font-weight:900;
-  color: rgba(30,31,34,.7);
-  font-size:13px;
 }
