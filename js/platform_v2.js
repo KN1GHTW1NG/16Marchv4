@@ -303,10 +303,11 @@ function draw() {
   ctx.translate(-cameraX, 0);
 
   drawClouds();
-  drawGrassPlatforms();
-  drawGoalCar();
-  drawPlayer();
-
+drawGrassPlatforms();
+drawLedges();
+drawCrates();
+drawGoalCar();
+drawPlayer();
   ctx.restore();
 }
 
@@ -397,7 +398,48 @@ function drawPlayer() {
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(playerImg, x, y, Math.round(drawW), Math.round(drawH));
 }
+function drawLedges() {
+  for (const l of ledges) {
+    // soft shadow
+    ctx.fillStyle = "rgba(0,0,0,0.12)";
+    ctx.fillRect(l.x + 2, l.y + 6, l.w, l.h);
 
+    // ledge body
+    const g = ctx.createLinearGradient(0, l.y, 0, l.y + l.h);
+    g.addColorStop(0, "#f4d6b5");
+    g.addColorStop(1, "#d3a679");
+    ctx.fillStyle = g;
+    ctx.fillRect(l.x, l.y, l.w, l.h);
+
+    // highlight
+    ctx.fillStyle = "rgba(255,255,255,0.22)";
+    ctx.fillRect(l.x, l.y + 2, l.w, 2);
+  }
+}
+
+function drawCrates() {
+  for (const c of crates) {
+    // shadow
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    ctx.fillRect(c.x + 3, c.y + 6, c.w, c.h);
+
+    // crate
+    const g = ctx.createLinearGradient(0, c.y, 0, c.y + c.h);
+    g.addColorStop(0, "#c98a4a");
+    g.addColorStop(1, "#9b5f2c");
+    ctx.fillStyle = g;
+    ctx.fillRect(c.x, c.y, c.w, c.h);
+
+    // simple “wood plank” lines
+    ctx.strokeStyle = "rgba(0,0,0,0.18)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(c.x + 2, c.y + 2, c.w - 4, c.h - 4);
+    ctx.beginPath();
+    ctx.moveTo(c.x + 6, c.y + c.h/2);
+    ctx.lineTo(c.x + c.w - 6, c.y + c.h/2);
+    ctx.stroke();
+  }
+}
 // Overlay buttons
 replayBtn?.addEventListener("click", respawn);
 continueBtn?.addEventListener("click", () => {
