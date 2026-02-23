@@ -1,89 +1,36 @@
+<!-- index.html (Gift Box Page) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Pick Your Gift 🎁</title>
-
-  <link rel="stylesheet" href="css/giftbox.css" />
+  <title>Pick the right gift 🎁</title>
+  <link rel="stylesheet" href="giftbox.css" />
 </head>
-
 <body>
-  <div class="wrap" id="wrap" tabindex="0">
 
-    <header class="hud">
-      <h1 class="title">Pick Your Gift 🎁</h1>
-      <p class="sub">Only one box has the <b>*right*</b> date. Choose wisely 😌</p>
+  <div class="page">
 
-      <div class="hint" id="hint">
-        Hint: find the birthday date 👀
-      </div>
+    <header class="card header">
+      <h1>Pick the right gift 🎁</h1>
+      <p>Only one box knows your birthday. The others are… impostors.</p>
     </header>
 
-    <!-- Confetti canvas -->
-    <canvas id="confetti" class="confetti" aria-hidden="true"></canvas>
-
-    <main class="grid" aria-label="gift boxes">
-      <!-- Row 1 -->
-      <button class="gift gift--a" type="button" data-date="16-02-2002">
-        <span class="ribbon"></span>
-        <span class="bow"></span>
-        <span class="tag">16-02-2002</span>
-      </button>
-
-      <button class="gift gift--b" type="button" data-date="16-03-2003">
-        <span class="ribbon"></span>
-        <span class="bow"></span>
-        <span class="tag">16-03-2003</span>
-      </button>
-
-      <!-- ✅ Middle (Correct) -->
-      <button class="gift gift--correct" type="button" data-date="16-03-2002" data-correct="1">
-        <span class="ribbon"></span>
-        <span class="bow"></span>
-        <span class="tag">16-03-2002</span>
-      </button>
-
-      <!-- Row 2 -->
-      <button class="gift gift--c" type="button" data-date="15-03-2002">
-        <span class="ribbon"></span>
-        <span class="bow"></span>
-        <span class="tag">15-03-2002</span>
-      </button>
-
-      <button class="gift gift--d" type="button" data-date="16-04-2002">
-        <span class="ribbon"></span>
-        <span class="bow"></span>
-        <span class="tag">16-04-2002</span>
-      </button>
-
-      <button class="gift gift--e" type="button" data-date="16-03-2001">
-        <span class="ribbon"></span>
-        <span class="bow"></span>
-        <span class="tag">16-03-2001</span>
-      </button>
+    <main class="grid" id="grid">
+      <!-- Boxes injected by JS -->
     </main>
 
-    <!-- Wrong choice modal -->
-    <div class="overlay hidden" id="wrong">
-      <div class="modal">
-        <div class="h2" id="wrongTitle">Nope 😭</div>
-        <div class="p" id="wrongMsg">Try again.</div>
-        <button class="pill" id="wrongOk" type="button">OK</button>
-      </div>
-    </div>
-
-    <!-- Correct choice modal -->
-    <div class="overlay hidden" id="win">
-      <div class="modal">
-        <div class="h2">Correct! 🎉</div>
-        <div class="p">Okay… you actually know the date 😌</div>
-        <button class="pill primary" id="continue" type="button">Continue</button>
+    <!-- Toast / Hint -->
+    <div class="toast hidden" id="toast">
+      <div class="toast-inner">
+        <div class="toast-title" id="toastTitle">Nope 😼</div>
+        <div class="toast-text" id="toastText">Try again.</div>
+        <button class="toast-btn" id="toastBtn">Okay</button>
       </div>
     </div>
 
   </div>
 
-  <script src="js/giftbox.js" defer></script>
+  <script src="giftbox.js" defer></script>
 </body>
 </html>
