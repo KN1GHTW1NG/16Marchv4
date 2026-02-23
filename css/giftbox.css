@@ -163,13 +163,33 @@ html, body{
   position:absolute;
   inset: 0;
   pointer-events:none;
-}
+}/* Default ribbon style: glossy */
 .ribbon::before,
 .ribbon::after{
-  content:"";
-  position:absolute;
-  background: rgba(255,255,255,.35);
-  border: 1px solid rgba(0,0,0,.06);
+  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.18));
+  border: 1px solid rgba(0,0,0,.10);
+  box-shadow: inset 0 8px 14px rgba(255,255,255,.18);
+}
+
+.bow::before,
+.bow::after{
+  background: linear-gradient(180deg, rgba(255,255,255,.70), rgba(255,255,255,.22));
+  border: 1px solid rgba(0,0,0,.10);
+  box-shadow: inset 0 10px 16px rgba(255,255,255,.18);
+}
+
+/* Per-box ribbon color (complimentary) */
+.gift--a .ribbon::before, .gift--a .ribbon::after, .gift--a .bow::before, .gift--a .bow::after { background: linear-gradient(180deg,#fff1d9,#ffd17b); }
+.gift--b .ribbon::before, .gift--b .ribbon::after, .gift--b .bow::before, .gift--b .bow::after { background: linear-gradient(180deg,#fff,#ffd1e6); }
+.gift--c .ribbon::before, .gift--c .ribbon::after, .gift--c .bow::before, .gift--c .bow::after { background: linear-gradient(180deg,#eafff1,#9dffd0); }
+.gift--d .ribbon::before, .gift--d .ribbon::after, .gift--d .bow::before, .gift--d .bow::after { background: linear-gradient(180deg,#f2fbff,#a9d7ff); }
+.gift--e .ribbon::before, .gift--e .ribbon::after, .gift--e .bow::before, .gift--e .bow::after { background: linear-gradient(180deg,#fff,#e8d6ff); }
+
+/* Correct pink ribbon a bit richer */
+.gift--correct .ribbon::before, .gift--correct .ribbon::after,
+.gift--correct .bow::before, .gift--correct .bow::after{
+  background: linear-gradient(180deg,#fff,#ffd1ea);
+
 }
 .ribbon::before{
   width: 18%;
