@@ -111,16 +111,17 @@ html, body{
 }
 
 /* Gift color themes */
-.gift--a{ background: linear-gradient(180deg, #ffe1b8, rgba(255,255,255,.10)); }
-.gift--b{ background: linear-gradient(180deg, #ffd0d7, rgba(255,255,255,.10)); }
-.gift--c{ background: linear-gradient(180deg, #d8ffe3, rgba(255,255,255,.10)); }
-.gift--d{ background: linear-gradient(180deg, #d1f3ff, rgba(255,255,255,.10)); }
-.gift--e{ background: linear-gradient(180deg, #e2dbff, rgba(255,255,255,.10)); }
+.gift--a{ background: linear-gradient(180deg, #ffcc8a 0%, #f39a3f 100%); }
+.gift--b{ background: linear-gradient(180deg, #ffd1dc 0%, #ff6fa3 100%); }
+.gift--c{ background: linear-gradient(180deg, #c7f9cc 0%, #2ec4b6 100%); }
+.gift--d{ background: linear-gradient(180deg, #bde0fe 0%, #3a86ff 100%); }
+.gift--e{ background: linear-gradient(180deg, #e0c3fc 0%, #7b2cbf 100%); }
 
-/* ✅ Correct box stays pink */
+/* ✅ Correct box stays PINK & richer */
 .gift--correct{
-  background: linear-gradient(180deg, var(--pink2), var(--pink1)) !important;
+  background: linear-gradient(180deg, #ffd1e6 0%, #ff5fa2 100%) !important;
 }
+
 
 /* shiny overlay */
 .gift::before{
