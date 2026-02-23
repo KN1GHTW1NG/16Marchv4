@@ -1,219 +1,287 @@
-// ---------------- DOM ----------------
-const gifts = Array.from(document.querySelectorAll(".gift"));
-const hintEl = document.getElementById("hint");
+// giftbox.js
+const grid = document.getElementById("grid");
+const toast = document.getElementById("toast");
+const toastTitle = document.getElementById("toastTitle");
+const toastText = document.getElementById("toastText");
+const toastBtn = document.getElementById("toastBtn");
 
-const wrongOverlay = document.getElementById("wrong");
-const wrongTitle = document.getElementById("wrongTitle");
-const wrongMsg = document.getElementById("wrongMsg");
-const wrongOk = document.getElementById("wrongOk");
+toastBtn.addEventListener("click", () => toast.classList.add("hidden"));
 
-const winOverlay = document.getElementById("win");
-const continueBtn = document.getElementById("continue");
+const CORRECT = "16-03-2002";
 
-const confettiCanvas = document.getElementById("confetti");
-const cctx = confettiCanvas.getContext("2d");
+// ✅ Dates made intentionally confusing (all “near” the real one)
+const dates = shuffle([
+  CORRECT,
+  "16-03-2003", // year off by 1
+  "16-02-2002", // month off by 1
+  "15-03-2002", // day off by 1
+  "16-03-2012", // year digit changed
+  "06-03-2002"  // day digit changed
+]);
 
-// ---------------- iPhone-safe canvas sizing ----------------
-let CW = 0, CH = 0, DPR = 1;
-function sizeConfetti() {
-  DPR = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
-  CW = window.innerWidth;
-  CH = window.innerHeight;
-  confettiCanvas.style.width = CW + "px";
-  confettiCanvas.style.height = CH + "px";
-  confettiCanvas.width = Math.floor(CW * DPR);
-  confettiCanvas.height = Math.floor(CH * DPR);
-  cctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-}
-window.addEventListener("resize", sizeConfetti);
-sizeConfetti();
+// Fun wrong messages
+const wrongLines = [
+  "Close… but that date feels like someone’s WiFi password 😭",
+  "Nope. That gift is for a parallel universe version of you.",
+  "Wrong box. This one contains… academic stress. Put it back.",
+  "Not this one. Try the date that actually deserves cake.",
+  "That one is fake. The real one is the birthday date 👀"
+];
 
-// ---------------- Tiny sounds (no external files) ----------------
+const hintLine = "Hint: Find your birthday date 🧁";
+
+// Colorful confetti palette
+const confettiColors = [
+  "#FFB6C1", "#F8C8DC", "#AA336A",
+  "#FFD166", "#06D6A0", "#118AB2",
+  "#EF476F", "#8338EC", "#FFBE0B"
+];
+
+// Themes (we force the CORRECT one to be the pink theme)
+const pinkTheme = { box:"#AA336A", lid:"#FFB6C1", ribbon:"#FFD166" };
+
+const giftThemes = [
+  { box:"#118AB2", lid:"#8EECF5", ribbon:"#FFB6C1" },
+  { box:"#06D6A0", lid:"#B8F2E6", ribbon:"#8338EC" },
+  { box:"#EF476F", lid:"#FFD6E8", ribbon:"#06D6A0" },
+  { box:"#8338EC", lid:"#CDB4FF", ribbon:"#FFBE0B" },
+  { box:"#FFBE0B", lid:"#FFF1B8", ribbon:"#AA336A" },
+];
+
+// ---------------- AUDIO (NO EXTERNAL FILES) ----------------
 let audioCtx = null;
 
-function ensureAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function ensureAudio(){
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AC();
+  }
   if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
 }
 
-function playPop() {
-  ensureAudio();
-  const t0 = audioCtx.currentTime;
+function playBuzzer(){
+  const ctx = ensureAudio();
+  const t0 = ctx.currentTime;
 
-  // quick "pop" noise + pitch
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
+  // “rocker buzzer”: detuned saws + quick pitch drop + grit
+  const osc1 = ctx.createOscillator();
+  const osc2 = ctx.createOscillator();
+  osc1.type = "sawtooth";
+  osc2.type = "square";
+  osc1.frequency.setValueAtTime(170, t0);
+  osc1.frequency.exponentialRampToValueAtTime(85, t0 + 0.18);
+  osc2.frequency.setValueAtTime(120, t0);
+  osc2.frequency.exponentialRampToValueAtTime(70, t0 + 0.18);
 
-  o.type = "triangle";
-  o.frequency.setValueAtTime(520, t0);
-  o.frequency.exponentialRampToValueAtTime(180, t0 + 0.12);
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, t0);
+  gain.gain.exponentialRampToValueAtTime(0.35, t0 + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.22);
 
-  g.gain.setValueAtTime(0.0001, t0);
-  g.gain.exponentialRampToValueAtTime(0.35, t0 + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.16);
+  const filter = ctx.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(1600, t0);
+  filter.frequency.exponentialRampToValueAtTime(700, t0 + 0.22);
 
-  o.connect(g);
-  g.connect(audioCtx.destination);
+  const waveShaper = ctx.createWaveShaper();
+  waveShaper.curve = makeDistortionCurve(35);
+  waveShaper.oversample = "4x";
 
-  o.start(t0);
-  o.stop(t0 + 0.18);
+  osc1.connect(filter);
+  osc2.connect(filter);
+  filter.connect(waveShaper);
+  waveShaper.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc1.start(t0);
+  osc2.start(t0);
+  osc1.stop(t0 + 0.24);
+  osc2.stop(t0 + 0.24);
 }
 
-function playBuzzer() {
-  ensureAudio();
-  const t0 = audioCtx.currentTime;
+function playSuccess(){
+  const ctx = ensureAudio();
+  const t0 = ctx.currentTime;
 
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
+  // cheerful “sparkle”: short arpeggio + tiny echo
+  const master = ctx.createGain();
+  master.gain.setValueAtTime(0.0001, t0);
+  master.gain.exponentialRampToValueAtTime(0.35, t0 + 0.02);
+  master.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.75);
 
-  o.type = "sawtooth";
-  o.frequency.setValueAtTime(120, t0);
+  const delay = ctx.createDelay(0.25);
+  delay.delayTime.setValueAtTime(0.12, t0);
+  const fb = ctx.createGain();
+  fb.gain.setValueAtTime(0.22, t0);
+  delay.connect(fb);
+  fb.connect(delay);
 
-  g.gain.setValueAtTime(0.0001, t0);
-  g.gain.exponentialRampToValueAtTime(0.28, t0 + 0.02);
-  g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.35);
+  master.connect(ctx.destination);
+  master.connect(delay);
+  delay.connect(ctx.destination);
 
-  o.connect(g);
-  g.connect(audioCtx.destination);
+  const notes = [659.25, 783.99, 987.77, 1318.51]; // E5, G5, B5, E6-ish vibe
+  notes.forEach((f, i) => {
+    const o = ctx.createOscillator();
+    o.type = "triangle";
+    const g = ctx.createGain();
+    const start = t0 + i * 0.08;
 
-  o.start(t0);
-  o.stop(t0 + 0.38);
+    o.frequency.setValueAtTime(f, start);
+    g.gain.setValueAtTime(0.0001, start);
+    g.gain.exponentialRampToValueAtTime(0.22, start + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, start + 0.22);
+
+    o.connect(g);
+    g.connect(master);
+
+    o.start(start);
+    o.stop(start + 0.25);
+  });
 }
 
-// ---------------- Confetti ----------------
-const COLORS = [
-  "#ff595e","#ffca3a","#8ac926","#1982c4","#6a4c93",
-  "#ff9f1c","#2ec4b6","#e71d36","#a2d2ff","#ffc8dd"
-];
-
-let confetti = [];
-let confettiRunning = false;
-
-function spawnConfettiBurst() {
-  const count = 140;
-  const cx = CW / 2;
-  const cy = Math.min(CH * 0.35, 320);
-
-  for (let i = 0; i < count; i++) {
-    const angle = (Math.random() * Math.PI * 2);
-    const speed = 5 + Math.random() * 9;
-    confetti.push({
-      x: cx,
-      y: cy,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - (6 + Math.random() * 5),
-      g: 0.25 + Math.random() * 0.20,
-      r: 2 + Math.random() * 4,
-      w: 6 + Math.random() * 8,
-      h: 4 + Math.random() * 6,
-      rot: Math.random() * Math.PI,
-      vr: (Math.random() - 0.5) * 0.25,
-      col: COLORS[Math.floor(Math.random() * COLORS.length)],
-      life: 180 + Math.floor(Math.random() * 80),
-    });
+function makeDistortionCurve(amount){
+  const n = 44100;
+  const curve = new Float32Array(n);
+  const k = typeof amount === "number" ? amount : 50;
+  for (let i = 0; i < n; i++) {
+    const x = (i * 2) / n - 1;
+    curve[i] = ((3 + k) * x * 20 * Math.PI / 180) / (Math.PI + k * Math.abs(x));
   }
+  return curve;
 }
 
-function stepConfetti() {
-  if (!confettiRunning) return;
+// ---------------- BUILD GIFTS ----------------
 
-  cctx.clearRect(0, 0, CW, CH);
+dates.forEach((d, i) => {
+  const theme = (d === CORRECT)
+    ? pinkTheme
+    : giftThemes[i % giftThemes.length];
 
-  confetti = confetti.filter(p => p.life > 0 && p.y < CH + 80);
+  const wrap = document.createElement("div");
+  wrap.className = "giftWrap";
 
-  for (const p of confetti) {
-    p.life--;
-    p.vy += p.g;
-    p.x += p.vx;
-    p.y += p.vy;
-    p.rot += p.vr;
+  wrap.innerHTML = `
+    <div class="gift" data-date="${d}" data-f="${(i%6)}">
+      <div class="lid"></div>
+      <div class="box">
+        <div class="ribbonV"></div>
+        <div class="ribbonH"></div>
+      </div>
+      <div class="bow"><div class="knot"></div></div>
+      <div class="tag">${d}</div>
+    </div>
+  `;
 
-    cctx.save();
-    cctx.translate(p.x, p.y);
-    cctx.rotate(p.rot);
-    cctx.fillStyle = p.col;
-    cctx.globalAlpha = 0.95;
-    cctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-    cctx.restore();
-  }
+  const gift = wrap.querySelector(".gift");
+  const lid = wrap.querySelector(".lid");
+  const box = wrap.querySelector(".box");
+  const ribbonV = wrap.querySelector(".ribbonV");
+  const ribbonH = wrap.querySelector(".ribbonH");
+  const bow = wrap.querySelector(".bow");
+  const knot = wrap.querySelector(".knot");
 
-  if (confetti.length === 0) {
-    confettiRunning = false;
-    cctx.clearRect(0, 0, CW, CH);
-    return;
-  }
+  // Apply theme colors (no “block” look)
+  box.style.background = makeBoxGradient(theme.box);
+  lid.style.background = makeLidGradient(theme.lid);
+  ribbonV.style.background = makeRibbonGradient(theme.ribbon);
+  ribbonH.style.background = makeRibbonGradient(theme.ribbon);
 
-  requestAnimationFrame(stepConfetti);
-}
+  // Bow colors
+  bow.style.filter = "drop-shadow(0 10px 12px rgba(0,0,0,.10))";
+  knot.style.background = theme.ribbon;
 
-function runConfetti() {
-  confetti = [];
-  spawnConfettiBurst();
-  confettiRunning = true;
-  requestAnimationFrame(stepConfetti);
-}
+  // bow halves (scoped to this card)
+  const style = document.createElement("style");
+  style.textContent = `
+    .giftWrap:nth-child(${i+1}) .bow::before,
+    .giftWrap:nth-child(${i+1}) .bow::after{
+      background: linear-gradient(180deg, ${theme.ribbon}, ${shade(theme.ribbon,-18)});
+    }
+  `;
+  document.head.appendChild(style);
 
-// ---------------- Wrong messages ----------------
-const roasts = [
-  "Close… but that date is giving 'random download link' energy.",
-  "Nope. That’s not the birthday date. Try again, detective 🕵️",
-  "Wrong box 😭 Hint: the right one is the *real* birthday date.",
-  "Not this one. You’re one month/year away… suspiciously close.",
-  "Incorrect. The correct box is pink for a reason 😌"
-];
+  // Click behavior
+  gift.addEventListener("click", () => {
+    const picked = gift.dataset.date;
 
-// ---------------- Click logic ----------------
-let solved = false;
-
-function showWrong(date) {
-  wrongTitle.textContent = "Nope 😭";
-  const msg = roasts[Math.floor(Math.random() * roasts.length)];
-  wrongMsg.textContent = msg + " (You picked: " + date + ")";
-  wrongOverlay.classList.remove("hidden");
-}
-
-function showWin() {
-  winOverlay.classList.remove("hidden");
-}
-
-wrongOk.addEventListener("click", () => {
-  wrongOverlay.classList.add("hidden");
-});
-
-continueBtn.addEventListener("click", () => {
-  // iOS: make sure AudioContext is awake on this tap too
-  ensureAudio();
-  playPop(); // little confirmation pop on Continue
-
-  // small delay so the pop plays before navigation
-  setTimeout(() => {
-    window.location.href = "secret.html";
-  }, 120);
-});
-
-gifts.forEach(btn => {
-  btn.addEventListener("click", () => {
-    if (solved) return;
-
-    // ensure sounds work on first tap (iOS requires gesture)
+    // iOS: make sure audio context is unlocked on the tap
     ensureAudio();
 
-    const date = btn.dataset.date || "";
-    const isCorrect = btn.dataset.correct === "1";
-
-    if (!isCorrect) {
+    if (picked !== CORRECT) {
       playBuzzer();
-      showWrong(date);
-      hintEl.textContent = "Hint: it’s her birthday date 👀";
+
+      toastTitle.textContent = "Nope 😼";
+      toastText.textContent =
+        `${wrongLines[Math.floor(Math.random()*wrongLines.length)]}\n\n${hintLine}`;
+      toast.classList.remove("hidden");
+
+      gift.animate(
+        [
+          {transform:"translateX(0)"},
+          {transform:"translateX(-6px)"},
+          {transform:"translateX(6px)"},
+          {transform:"translateX(0)"}
+        ],
+        {duration: 220, iterations: 1}
+      );
       return;
     }
 
-    solved = true;
-    hintEl.textContent = "YES! That’s the one 🎉";
-    playPop();
-    runConfetti();
+    // Correct one: open + confetti + success sound
+    playSuccess();
+    gift.classList.add("open");
+    burstConfetti(gift);
 
-    // show win modal after a tiny beat
-    setTimeout(showWin, 450);
+    setTimeout(() => {
+      window.location.href = "montage.html"; // keep your next page name here
+    }, 1600);
   });
+
+  grid.appendChild(wrap);
 });
+
+function burstConfetti(anchor){
+  for(let i=0;i<45;i++){
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.background = confettiColors[Math.floor(Math.random()*confettiColors.length)];
+    c.style.left = (Math.random()*220 - 80) + "px";
+    c.style.top = (Math.random()*20 - 10) + "px";
+    c.style.animationDuration = (0.8 + Math.random()*0.7) + "s";
+    c.style.transform = `rotate(${Math.random()*180}deg)`;
+    anchor.appendChild(c);
+    setTimeout(() => c.remove(), 1400);
+  }
+}
+
+// Helpers
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function makeBoxGradient(color){
+  return `linear-gradient(180deg, ${shade(color, 12)}, ${shade(color, -10)})`;
+}
+function makeLidGradient(color){
+  return `linear-gradient(180deg, ${shade(color, 18)}, ${shade(color, -8)})`;
+}
+function makeRibbonGradient(color){
+  return `linear-gradient(180deg, ${shade(color, 14)}, ${shade(color, -10)})`;
+}
+function shade(hex, amt){
+  const c = hex.replace("#","");
+  const num = parseInt(c,16);
+  let r = (num >> 16) + amt;
+  let g = ((num >> 8) & 0x00FF) + amt;
+  let b = (num & 0x0000FF) + amt;
+  r = Math.max(0, Math.min(255, r));
+  g = Math.max(0, Math.min(255, g));
+  b = Math.max(0, Math.min(255, b));
+  return "#" + (r<<16 | g<<8 | b).toString(16).padStart(6,"0");
+}
