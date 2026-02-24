@@ -255,84 +255,35 @@ body{
 
 .lantern .glow{
   position:absolute;
-  inset: 12px 16px 18px 16px;
-  border-radius: 16px;
-
-  background:
-    radial-gradient(circle at 50% 35%,
-      rgba(255,240,190,1),
-      rgba(255,170,80,.45),
-      rgba(255,80,140,.18),
-      rgba(255,255,255,0)
-    );
-
-  filter: blur(3px);
-  opacity: .95;
-  animation: flicker 1.7s ease-in-out infinite;
+  inset: 10px 14px 16px 14px;
+  border-radius: 18px;
+  background: radial-gradient(circle at 50% 35%, rgba(255,230,170,.95), rgba(255,120,170,.28), rgba(255,255,255,0));
+  filter: blur(2px);
+  opacity: .85;
+  animation: flicker 1.9s ease-in-out infinite;
 }
 
 /* PNG photo sits ABOVE glow so transparency reveals glow behind */
 .lantern .photo{
   position:absolute;
-  inset: 18px 20px 28px 20px;
-  width: calc(100% - 40px);
-  height: calc(100% - 46px);
+  inset: 16px 18px 26px 18px;
+  width: calc(100% - 36px);
+  height: calc(100% - 42px);
   object-fit: contain;
-
-  /* helps visibility on light backgrounds */
-  filter: drop-shadow(0 10px 10px rgba(0,0,0,.18));
-  opacity: .98;
+  transform: translateZ(0);
+  filter: drop-shadow(0 10px 12px rgba(0,0,0,.10));
 }
 
 /* Lantern front frame */
-/* Wooden lantern frame + 3 panes */
 .lantern .frame{
   position:absolute;
   inset:0;
-  border-radius: 18px 18px 22px 22px;
-
-  /* wood body */
+  border-radius: 20px 20px 22px 22px;
   background:
-    linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.08)),
-    linear-gradient(90deg, #7a4a22, #a66b34, #7a4a22);
-
-  border: 2px solid rgba(60,32,10,.55);
-  box-shadow:
-    0 18px 26px rgba(0,0,0,.22),
-    inset 0 0 0 2px rgba(255,255,255,.10);
-
-  overflow:hidden;
-}
-
-/* inner “pane area” */
-.lantern .frame::before{
-  content:"";
-  position:absolute;
-  inset: 14px 14px 20px 14px;
-  border-radius: 14px;
-  background: rgba(255,255,255,.06);
-  box-shadow: inset 0 0 0 2px rgba(30,15,5,.25);
-}
-
-/* 3 vertical panes separators */
-.lantern .frame::after{
-  content:"";
-  position:absolute;
-  inset: 18px 18px 26px 18px;
-  border-radius: 12px;
-
-  background:
-    linear-gradient(to right,
-      rgba(60,32,10,.75) 0 2px,
-      transparent 2px calc(33.33% - 1px),
-      rgba(60,32,10,.75) calc(33.33% - 1px) calc(33.33% + 1px),
-      transparent calc(33.33% + 1px) calc(66.66% - 1px),
-      rgba(60,32,10,.75) calc(66.66% - 1px) calc(66.66% + 1px),
-      transparent calc(66.66% + 1px) 100%
-    );
-
-  opacity: .95;
-  pointer-events:none;
+    linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0)),
+    radial-gradient(120% 100% at 50% 10%, rgba(255,255,255,.25), rgba(0,0,0,0));
+  border: 1px solid rgba(170,51,106,.22);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.18);
 }
 
 /* light-only lanterns: no image */
@@ -356,12 +307,7 @@ body{
 .L3{ left: 18px;  bottom: 120px; animation-duration: 8.8s; }
 .L4{ right: 20px; bottom: 170px; width: 70px; height: 98px; opacity:.95; animation-duration: 7.9s; }
 .L5{ left: 50%; top: 78px; transform: translateX(-50%); width: 64px; height: 92px; opacity:.92; animation-duration: 7.4s; }
-/* New lantern positions (fill lower empty space) */
-.L6{ left: 10px;  top: 320px;  width: 92px; height: 130px; }
-.L7{ right: 12px; top: 360px;  width: 88px; height: 125px; }
-.L8{ left: 22px;  bottom: 28px; width: 96px; height: 138px; } /* below rectangle */
-.L9{ right: 22px; bottom: 40px; width: 74px; height: 104px; opacity:.95; }
-.L10{ left: 55%; bottom: 110px; width: 70px; height: 98px; opacity:.92; transform: translateX(-50%); }
+
 /* ---------- Confetti + petals layer ---------- */
 .fx{
   position: fixed;
