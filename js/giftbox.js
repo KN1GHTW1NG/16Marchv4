@@ -1,4 +1,3 @@
-document.documentElement.style.outline = "6px solid lime";
 // giftbox.js
 const grid = document.getElementById("grid");
 const toast = document.getElementById("toast");
@@ -236,7 +235,7 @@ dates.forEach((d, i) => {
     burstConfetti(gift);
 
     setTimeout(() => {
-      window.location.href = "montage.html"; // keep your next page name here
+      window.location.href = "secret.html"; // keep your next page name here
     }, 1600);
   });
 
