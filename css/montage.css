@@ -356,7 +356,12 @@ body{
 .L3{ left: 18px;  bottom: 120px; animation-duration: 8.8s; }
 .L4{ right: 20px; bottom: 170px; width: 70px; height: 98px; opacity:.95; animation-duration: 7.9s; }
 .L5{ left: 50%; top: 78px; transform: translateX(-50%); width: 64px; height: 92px; opacity:.92; animation-duration: 7.4s; }
-
+/* New lantern positions (fill lower empty space) */
+.L6{ left: 10px;  top: 320px;  width: 92px; height: 130px; }
+.L7{ right: 12px; top: 360px;  width: 88px; height: 125px; }
+.L8{ left: 22px;  bottom: 28px; width: 96px; height: 138px; } /* below rectangle */
+.L9{ right: 22px; bottom: 40px; width: 74px; height: 104px; opacity:.95; }
+.L10{ left: 55%; bottom: 110px; width: 70px; height: 98px; opacity:.92; transform: translateX(-50%); }
 /* ---------- Confetti + petals layer ---------- */
 .fx{
   position: fixed;
