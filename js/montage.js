@@ -86,3 +86,116 @@ function spawnPetal(){
 // Timers tuned for “continuous but not chaotic”
 setInterval(spawnConfettiBurst, 520); // confetti loop
 setInterval(spawnPetal, 430);         // petals loop
+// ---------------- Lantern Brownian Motion + Interactivity ----------------
+(function(){
+  const lanterns = Array.from(document.querySelectorAll(".lantern-layer .lantern"));
+  if (!lanterns.length) return;
+
+  // Respect reduced motion (optional but good)
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) return;
+
+  // Build physics state from current CSS positions
+  const state = lanterns.map(el => {
+    const rect = el.getBoundingClientRect();
+    const parent = el.parentElement.getBoundingClientRect();
+
+    // initial base position inside layer
+    const x0 = rect.left - parent.left;
+    const y0 = rect.top  - parent.top;
+
+    // We'll keep the CSS top/left as "anchor" and animate around it using translate vars.
+    // Make sure elements are positioned via top/left already (your .L1/.L2... do that).
+    return {
+      el,
+      // translation around anchor
+      tx: 0, ty: 0,
+      vx: 0, vy: 0,
+
+      // rotation
+      rot: (Math.random()*10 - 5),
+      rv: (Math.random()*0.6 - 0.3),
+
+      // unique feel per lantern
+      accel: 18 + Math.random()*10,   // random push strength
+      damp:  0.90 + Math.random()*0.04, // velocity damping
+      maxV:  22 + Math.random()*10,   // speed cap
+      bounds: 18 + Math.random()*10,  // how far it can wander
+      wobble: 0.6 + Math.random()*0.8
+    };
+  });
+
+  // Tap to focus / unfocus
+  lanterns.forEach(el => {
+    el.addEventListener("click", () => {
+      const is = el.classList.toggle("isFocus");
+
+      // Unfocus others (keeps it neat)
+      if (is) {
+        lanterns.forEach(other => { if (other !== el) other.classList.remove("isFocus"); });
+      }
+
+      // Tiny “pulse” feedback
+      el.animate(
+        [{ transform: getComputedStyle(el).transform }, { transform: getComputedStyle(el).transform }],
+        { duration: 1 }
+      );
+    }, { passive: true });
+  });
+
+  let last = performance.now();
+
+  function tick(now){
+    const dt = Math.min(0.033, (now - last) / 1000);
+    last = now;
+
+    // Get container size to keep motion sane on rotate/resizes
+    const layer = document.querySelector(".lantern-layer");
+    const W = layer ? layer.clientWidth : window.innerWidth;
+    const H = layer ? layer.clientHeight : window.innerHeight;
+
+    for (const s of state) {
+      // Random acceleration (Brownian-ish)
+      const ax = (Math.random()*2 - 1) * s.accel;
+      const ay = (Math.random()*2 - 1) * s.accel;
+
+      s.vx = (s.vx + ax * dt) * s.damp;
+      s.vy = (s.vy + ay * dt) * s.damp;
+
+      // Speed cap (keeps it elegant)
+      const sp = Math.hypot(s.vx, s.vy);
+      if (sp > s.maxV) {
+        const k = s.maxV / sp;
+        s.vx *= k; s.vy *= k;
+      }
+
+      // Apply
+      s.tx += s.vx * dt;
+      s.ty += s.vy * dt;
+
+      // Soft bounds around anchor (spring back)
+      const b = s.bounds;
+      if (s.tx > b)  s.vx -= (s.tx - b) * 6 * dt;
+      if (s.tx < -b) s.vx -= (s.tx + b) * 6 * dt;
+      if (s.ty > b)  s.vy -= (s.ty - b) * 6 * dt;
+      if (s.ty < -b) s.vy -= (s.ty + b) * 6 * dt;
+
+      // Gentle rotation drift
+      s.rv = (s.rv + (Math.random()*2 - 1) * 0.25 * dt) * 0.985;
+      s.rot += s.rv;
+
+      // Keep rotation subtle
+      if (s.rot > 10) s.rot = 10;
+      if (s.rot < -10) s.rot = -10;
+
+      // Write to CSS variables
+      s.el.style.setProperty("--tx", s.tx.toFixed(2) + "px");
+      s.el.style.setProperty("--ty", s.ty.toFixed(2) + "px");
+      s.el.style.setProperty("--rot", s.rot.toFixed(2) + "deg");
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+})();
