@@ -250,24 +250,31 @@ body{
   position:absolute;
   width: 82px;
   height: 114px;
+  overflow: visible; /* critical so sparkle trail can show */
+
   --tx: 0px;
   --ty: 0px;
   --rot: 0deg;
   --scale: 1;
+
   transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(var(--scale));
   will-change: transform;
   filter: drop-shadow(0 10px 14px rgba(0,0,0,.18));
   pointer-events: auto;
   cursor: pointer;
-
-  /* elegant stronger hover */
-  animation: lanternFloat 4.2s ease-in-out infinite;
+  animation: lanternFloat 4.4s ease-in-out infinite;
 }
 
 @keyframes lanternFloat{
-  0%{ transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(var(--scale)); }
-  50%{ transform: translate(var(--tx), calc(var(--ty) - 9px)) rotate(calc(var(--rot) + 0.8deg)) scale(var(--scale)); }
-  100%{ transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(var(--scale)); }
+  0%{
+    transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(var(--scale));
+  }
+  50%{
+    transform: translate(var(--tx), calc(var(--ty) - 12px)) rotate(calc(var(--rot) + 1deg)) scale(var(--scale));
+  }
+  100%{
+    transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(var(--scale));
+  }
 }
 
 .lantern:active{
@@ -335,11 +342,11 @@ body{
 /* elegant sparkle trail under lantern */
 .sparkles{
   position:absolute;
-  left: 50%;
-  bottom: -8px;
-  width: 34px;
-  height: 52px;
-  transform: translateX(-50%);
+  left:50%;
+  bottom:-6px;
+  width:40px;
+  height:60px;
+  transform:translateX(-50%);
   pointer-events:none;
   overflow: visible;
 }
@@ -350,34 +357,38 @@ body{
   position:absolute;
   left:50%;
   bottom:0;
-  width: 4px;
-  height: 4px;
+  width:4px;
+  height:4px;
   margin-left:-2px;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(255,255,255,.95), rgba(255,214,140,.75), rgba(255,214,140,0));
+  border-radius:50%;
+  background: radial-gradient(circle,
+    rgba(255,255,255,1),
+    rgba(255,220,150,.8),
+    rgba(255,220,150,0)
+  );
   box-shadow:
-    0 -10px 0 0 rgba(255,245,220,.65),
-    -6px -18px 0 0 rgba(255,214,140,.45),
-    7px -24px 0 0 rgba(255,255,255,.4);
-  animation: sparkleRise 1.8s linear infinite;
-  opacity: .9;
+    0 -10px 0 0 rgba(255,245,220,.72),
+    -6px -18px 0 0 rgba(255,214,140,.52),
+    7px -24px 0 0 rgba(255,255,255,.48);
+  animation: sparkleRise 2s linear infinite;
+  opacity:.95;
 }
 
 .sparkles::after{
-  animation-delay: .9s;
-  opacity: .65;
+  animation-delay: 1s;
+  opacity:.7;
 }
 
 @keyframes sparkleRise{
   0%{
-    transform: translate(-50%, 0) scale(.85);
+    transform: translate(-50%, 0) scale(.8);
     opacity: 0;
   }
   18%{
-    opacity: .9;
+    opacity: 1;
   }
   100%{
-    transform: translate(-50%, -28px) scale(1.15);
+    transform: translate(-50%, -40px) scale(1.25);
     opacity: 0;
   }
 }
@@ -390,63 +401,62 @@ body{
 }
 
 /* ---------- Balanced lantern positions ---------- */
-/* nothing over heading/subtitle */
-/* spaced evenly around card, no overlap */
+/* kept away from header and card text, evenly distributed */
 
 .L1{
-  left: 10px;
+  left: 12px;
   top: 120px;
-  width: 72px;
-  height: 100px;
+  width: 70px;
+  height: 98px;
 }
 
 .L2{
   right: 12px;
-  top: 126px;
-  width: 72px;
-  height: 100px;
+  top: 120px;
+  width: 70px;
+  height: 98px;
 }
 
 .L3{
   left: 8px;
-  top: 315px;
-  width: 78px;
-  height: 108px;
+  top: 300px;
+  width: 76px;
+  height: 104px;
 }
 
 .L4{
-  right: 10px;
-  top: 320px;
-  width: 78px;
-  height: 108px;
+  right: 8px;
+  top: 300px;
+  width: 76px;
+  height: 104px;
 }
 
 .L5{
   left: 12px;
-  bottom: 170px;
-  width: 74px;
-  height: 102px;
+  bottom: 185px;
+  width: 72px;
+  height: 100px;
 }
 
 .L6{
   right: 12px;
-  bottom: 174px;
+  bottom: 185px;
+  width: 72px;
+  height: 100px;
+}
+
+.L7{
+  left: 96px;
+  bottom: 48px;
   width: 74px;
   height: 102px;
 }
 
-.L7{
-  left: 112px;
-  bottom: 48px;
-  width: 76px;
-  height: 104px;
-}
-
 .L8{
-  right: 112px;
-  bottom: 44px;
-  width: 76px;
-  height: 104px;
+  right: 96px;
+  bottom: 48px;
+  width: 74px;
+  height: 102px;
 }
 
 /* ---------- Confetti + petals layer ---------- */
