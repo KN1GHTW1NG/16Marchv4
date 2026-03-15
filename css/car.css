@@ -10,7 +10,7 @@
 html, body {
   margin: 0;
   height: 100%;
-  overflow: hidden;                 /* stops scrolling */
+  overflow: hidden;
   font-family: system-ui;
   background: linear-gradient(180deg, var(--pink2), var(--pink1));
   -webkit-text-size-adjust: 100%;
@@ -22,7 +22,8 @@ html, body {
   display: flex;
   flex-direction: column;
   padding: 10px;
-  padding-bottom: calc(var(--controlsH) + env(safe-area-inset-bottom));
+  /* reserve only button space, not a giant frosted footer slab */
+  padding-bottom: calc(84px + env(safe-area-inset-bottom));
 }
 
 .hud {
@@ -63,7 +64,7 @@ html, body {
 
 .stage {
   flex: 1;
-  min-height: 0;                    /* CRITICAL: prevents overflow in flex */
+  min-height: 0;
   display: flex;
   justify-content: center;
   align-items: stretch;
@@ -82,26 +83,25 @@ canvas {
 }
 
 .controls {
-  height: var(--controlsH);
   pointer-events: auto;
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  left: 50%;
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
   z-index: 999;
 
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
 
-  border-top: 1px solid rgba(0,0,0,0.06);
+  /* no giant white bar */
+  padding: 0;
+  height: auto;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-top: 0;
 }
 
 .control-btn {
@@ -142,12 +142,18 @@ canvas {
   border-radius: 20px;
   text-align: center;
 }
+
 .controls, .controls * {
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
 }
-.small { font-size: 13px; color: var(--pink3); margin-top: 6px; }
+
+.small {
+  font-size: 13px;
+  color: var(--pink3);
+  margin-top: 6px;
+}
 
 .loadBar{
   width: min(320px, 90%);
