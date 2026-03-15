@@ -4,14 +4,7 @@ const flipBtn = document.getElementById("flipBtn");
 const backBtn = document.getElementById("backBtn");
 
 const fx = document.getElementById("fx");
-
-const noteImg = document.getElementById("noteImg");
-const notePlaceholder = document.getElementById("notePlaceholder");
 const downloadBtn = document.getElementById("downloadBtn");
-
-// ✅ SET THIS LATER when you upload your handwritten note image:
-// Example: "assets/handnote.png"
-const NOTE_SRC = ""; // <-- put file path here later
 
 // ----- Flip logic -----
 flipBtn.addEventListener("click", () => {
@@ -21,24 +14,18 @@ backBtn.addEventListener("click", () => {
   flip.classList.remove("isFlipped");
 });
 
-// ----- Note wiring -----
-function wireNote(){
-  if (!NOTE_SRC) {
-    // keep placeholder visible
-    downloadBtn.classList.add("disabled");
-    downloadBtn.href = "#";
-    return;
-  }
+// ----- PDF download fix for Safari -----
+downloadBtn.addEventListener("click", (e) => {
+  e.preventDefault();
 
-  noteImg.src = NOTE_SRC;
-  noteImg.style.display = "block";
-  notePlaceholder.style.display = "none";
-
-  // simple download (same-origin assets)
-  downloadBtn.href = NOTE_SRC;
-  downloadBtn.setAttribute("download", "note.png");
-}
-wireNote();
+  const pdfUrl = "assets/note.pdf";
+  const a = document.createElement("a");
+  a.href = pdfUrl;
+  a.download = "note.pdf";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+});
 
 // ----- Continuous confetti + petals -----
 const confettiColors = [
@@ -48,10 +35,7 @@ const confettiColors = [
 ];
 
 function spawnConfettiBurst(){
-  // small burst from random x near top
   const burstX = Math.random() * window.innerWidth;
-
-  // ✅ reduced count for Safari performance
   const count = 5 + Math.floor(Math.random() * 4);
 
   for(let i=0;i<count;i++){
@@ -84,9 +68,8 @@ function spawnPetal(){
   setTimeout(()=> p.remove(), (dur*1000) + 300);
 }
 
-// ✅ reduced spawn frequency for Safari
-const confettiTimer = setInterval(spawnConfettiBurst, 1200);
-const petalTimer = setInterval(spawnPetal, 900);
+setInterval(spawnConfettiBurst, 1200);
+setInterval(spawnPetal, 900);
 
 // ---------------- Lantern DVD Motion + Interactivity ----------------
 (function(){
@@ -99,7 +82,6 @@ const petalTimer = setInterval(spawnPetal, 900);
 
   let isPaused = false;
 
-  // Helper
   function px(val){
     const n = parseFloat(val);
     return Number.isFinite(n) ? n : 0;
@@ -109,7 +91,6 @@ const petalTimer = setInterval(spawnPetal, 900);
     return Math.max(min, Math.min(max, v));
   }
 
-  // Build state from current CSS positions
   const state = lanterns.map((el) => {
     const cs = getComputedStyle(el);
     const layerRect = layer.getBoundingClientRect();
@@ -124,33 +105,27 @@ const petalTimer = setInterval(spawnPetal, 900);
     const right = px(cs.right);
     const bottom = px(cs.bottom);
 
-    // handle right-positioned lanterns
     if (cs.left === "auto" && cs.right !== "auto") {
       x = layerRect.width - right - w;
     }
 
-    // handle bottom-positioned lanterns
     if (cs.top === "auto" && cs.bottom !== "auto") {
       y = layerRect.height - bottom - h;
     }
 
-    // fallback to actual rendered position
     if (!Number.isFinite(x) || !Number.isFinite(y)) {
       x = rect.left - layerRect.left;
       y = rect.top - layerRect.top;
     }
 
-    // ✅ slower speed for Safari smoothness
     const speed = 12 + Math.random() * 10;
     const angle = Math.random() * Math.PI * 2;
 
-    // freeze current position into inline styles so motion is fully JS controlled
     el.style.left = x + "px";
     el.style.top = y + "px";
     el.style.right = "auto";
     el.style.bottom = "auto";
 
-    // reset translation vars
     el.style.setProperty("--tx", "0px");
     el.style.setProperty("--ty", "0px");
 
@@ -168,7 +143,6 @@ const petalTimer = setInterval(spawnPetal, 900);
     };
   });
 
-  // Tap to focus / unfocus
   lanterns.forEach(el => {
     el.addEventListener("click", () => {
       const is = el.classList.toggle("isFocus");
@@ -200,7 +174,6 @@ const petalTimer = setInterval(spawnPetal, 900);
       s.x += s.vx * dt;
       s.y += s.vy * dt;
 
-      // bounce off left/right
       if (s.x <= 0) {
         s.x = 0;
         s.vx = Math.abs(s.vx);
@@ -209,7 +182,6 @@ const petalTimer = setInterval(spawnPetal, 900);
         s.vx = -Math.abs(s.vx);
       }
 
-      // bounce off top/bottom
       if (s.y <= 0) {
         s.y = 0;
         s.vy = Math.abs(s.vy);
@@ -218,7 +190,6 @@ const petalTimer = setInterval(spawnPetal, 900);
         s.vy = -Math.abs(s.vy);
       }
 
-      // ✅ softer rotation drift
       s.rv = (s.rv + (Math.random() * 2 - 1) * 0.08 * dt) * 0.992;
       s.rot += s.rv;
       s.rot = clamp(s.rot, -s.rotMax, s.rotMax);
@@ -233,7 +204,6 @@ const petalTimer = setInterval(spawnPetal, 900);
 
   requestAnimationFrame(tick);
 
-  // Keep lanterns inside bounds on resize / orientation change
   window.addEventListener("resize", () => {
     const W = layer.clientWidth;
     const H = layer.clientHeight;
@@ -251,7 +221,6 @@ const petalTimer = setInterval(spawnPetal, 900);
     });
   }, { passive: true });
 
-  // ✅ pause animation when page is hidden
   document.addEventListener("visibilitychange", () => {
     isPaused = document.hidden;
   });
